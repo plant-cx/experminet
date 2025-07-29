@@ -141,101 +141,53 @@
     </div>
 
     <script>
-        const chatMessages = document.getElementById('chatbox-messages');
-        const userInput = document.getElementById('user-input');
-        const sendButton = document.getElementById('send-button');
-        const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
+// Example of a Netlify function's content (simplified)
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-        function addMessage(text, sender, isThinking = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', sender);
-            if (isThinking) {
-                messageDiv.classList.add('thinking');
-            }
-            messageDiv.textContent = text;
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
-            return messageDiv; // Return the element for potential removal
-        }
+exports.handler = async (event) => {
+    // Ensure this is where you're getting your API Key
+    const API_KEY = process.env.GEMINI_API_KEY; // Or however you're getting it
 
-        async function getAiResponse(message) {
-            let thinkingMessageDiv;
+    if (!API_KEY) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: 'API Key not configured.' }),
+        };
+    }
 
-            try {
-                // Show a "thinking" message while waiting for AI
-                thinkingMessageDiv = addMessage("AI is thinking...", 'ai', true);
+    const genAI = new GoogleGenerativeAI(API_KEY);
 
-                const netlifyFunctionUrl = '/.netlify/functions/chat';
+    // THIS IS THE LINE YOU NEED TO CHANGE:
+    // const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" }); // OLD, causes error
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); // NEW, correct model
 
-                const response = await fetch(netlifyFunctionUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: message })
-                });
-
-                // Remove the thinking message before adding the actual AI response
-                const currentThinkingMessage = chatMessages.querySelector('.message.ai.thinking');
-                if (currentThinkingMessage && currentThinkingMessage.parentNode) {
-                    currentThinkingMessage.parentNode.removeChild(currentThinkingMessage);
-                }
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: 'Unknown error format' }));
-                    throw new Error(`AI response error: ${response.status} - ${errorData.error || 'Unknown Backend Error'}`);
-                }
-
-                const data = await response.json();
-                addMessage(data.reply, 'ai');
-
-            } catch (error) {
-                console.error('Error fetching AI response:', error);
-                const currentThinkingMessage = chatMessages.querySelector('.message.ai.thinking');
-                if (currentThinkingMessage && currentThinkingMessage.parentNode) {
-                    currentThinkingMessage.parentNode.removeChild(currentThinkingMessage);
-                }
-                addMessage(`Sorry, an error occurred: ${error.message}`, 'ai');
-            } finally {
-                const currentThinkingMessage = chatMessages.querySelector('.message.ai.thinking');
-                if (currentThinkingMessage && currentThinkingMessage.parentNode) {
-                    currentThinkingMessage.parentNode.removeChild(currentThinkingMessage);
-                }
-            }
-        }
-
-        sendButton.addEventListener('click', () => {
-            const message = userInput.value.trim();
-            if (message) {
-                addMessage(message, 'user');
-                getAiResponse(message);
-                userInput.value = '';
-            }
+    try {
+        const { message } = JSON.parse(event.body);
+        const chat = model.startChat({
+            history: [
+                // You might want to pass chat history from the frontend here
+                // For a simple single turn, you can omit history or pass an empty array
+            ],
+            generationConfig: {
+                maxOutputTokens: 200, // Adjust as needed
+            },
         });
 
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendButton.click();
-            }
-        });
+        const result = await chat.sendMessage(message);
+        const responseText = result.response.text();
 
-        // Scroll to bottom button logic
-        chatMessages.addEventListener('scroll', () => {
-            // Show button if not at the very bottom
-            if (chatMessages.scrollHeight - chatMessages.scrollTop > chatMessages.clientHeight + 20) { // 20px buffer
-                scrollToBottomBtn.classList.add('show');
-            } else {
-                scrollToBottomBtn.classList.remove('show');
-            }
-        });
-
-        scrollToBottomBtn.addEventListener('click', () => {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        });
-
-        // Initial message
-        addMessage("Hello! How can I help you today?", 'ai');
-
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ reply: responseText }),
+        };
+    } catch (error) {
+        console.error("Error in Netlify function:", error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: `Failed to get response from AI. [GoogleGenerativeAI Error]: ${error.message}` }),
+        };
+    }
+};
     </script>
 </body>
 </html>

@@ -1,12 +1,12 @@
 // netlify/functions/chat.js
-const fetch = require('node-fetch'); // Import node-fetch for making HTTP requests
+const { GoogleGenerativeAI } = require("@google/generative-ai"); // Import Google Generative AI SDK
 
 exports.handler = async (event) => {
     // Only allow POST requests
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
- 
+
     try {
         // Parse the message from the request body
         const { message } = JSON.parse(event.body);
@@ -20,64 +20,36 @@ exports.handler = async (event) => {
             };
         }
 
-        // Get OpenAI API Key from environment variables
-        const openaiApiKey = process.env.OPENAI_API_KEY;
-        if (!openaiApiKey) {
-            console.error('OPENAI_API_KEY environment variable not set.');
+        // Get Google Gemini API Key from environment variables
+        const geminiApiKey = process.env.GEMINI_API_KEY; // Use your new environment variable
+        if (!geminiApiKey) {
+            console.error('GEMINI_API_KEY environment variable not set.');
             return {
                 statusCode: 500,
-                body: JSON.stringify({ error: 'Server configuration error: OpenAI API Key not found.' }),
+                body: JSON.stringify({ error: 'Server configuration error: Gemini API Key not found.' }),
                 headers: { 'Content-Type': 'application/json' },
             };
         }
 
-        // OpenAI API endpoint and model
-        const openaiEndpoint = 'https://api.openai.com/v1/chat/completions';
-        const modelName = 'gpt-3.5-turbo'; // You can change this to 'gpt-4o', 'gpt-4-turbo', etc.
+        // Initialize Google Generative AI with your API key
+        const genAI = new GoogleGenerativeAI(geminiApiKey);
 
-        // Make the request to OpenAI
-        const response = await fetch(openaiEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${openaiApiKey}` // Authentication using Bearer token
-            },
-            body: JSON.stringify({
-                model: modelName,
-                messages: [
-                    // Optional: A system message to set the AI's persona or instructions
-                    { role: "system", content: "You are a helpful assistant." },
-                    // The user's current message
-                    { role: "user", content: message }
-                ],
-                max_tokens: 150, // Limits the length of the AI's response
-                temperature: 0.7 // Controls creativity/randomness (0.0-1.0, higher is more creative)
-            })
-        });
+        // For text-only input, use the gemini-1.0-pro model
+        // This model is generally stable and widely available.
+        const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
 
-        // Check if the OpenAI API call was successful
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: 'Unknown error format from OpenAI' }));
-            console.error(`OpenAI API responded with error status ${response.status}:`, errorData);
-            throw new Error(`OpenAI API error: ${response.status} - ${JSON.stringify(errorData)}`);
-        }
+        // Correct way to send a simple string message to generateContent for a single turn
+        const result = await model.generateContent(message);
 
-        // Parse the response from OpenAI
-        const data = await response.json();
-
-        // Extract the AI's reply from the response
-        const aiReply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-
-        if (!aiReply) {
-            console.error('No valid reply content received from OpenAI:', data);
-            throw new Error('No valid reply received from AI. Response structure unexpected.');
-        }
+        // Extract the response text
+        const response = await result.response;
+        const text = response.text();
 
         // Return the AI's reply to the frontend
         return {
             statusCode: 200,
-            body: JSON.stringify({ reply: aiReply }),
-            headers: { "Content-Type": "application/json" }, // Simple header
+            body: JSON.stringify({ reply: text }),
+            headers: { "Content-Type": "application/json" }, // Only this header is typically needed
         };
 
     } catch (error) {

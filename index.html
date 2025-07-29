@@ -440,25 +440,25 @@
                 if (isThinking) {
                     messageDiv.classList.add('thinking'); // Add 'thinking' class for specific styling
                 }
-                messageDiv.textContent = text;
+                messageDiv.innerHTML = text; // Use innerHTML to allow for potential formatting like bold/italic if needed
                 chatMessages.appendChild(messageDiv);
                 // Scroll to the bottom of the chat
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
 
-            // Initial AI greeting (moved from HTML to JS for consistency)
+            // Initial AI greeting
             addMessage("Hello! I'm here to help you understand Quantum Mechanics. Ask me anything!", 'ai');
 
             async function getAiResponse(message) {
-                let thinkingMessageDiv; // Declare outside try-catch for wider scope
+                let thinkingMessageDiv; 
 
                 try {
                     // Show a "thinking" message while waiting for AI
-                    thinkingMessageDiv = addMessage("AI is thinking...", 'ai', true); // Pass true to set isThinking
+                    thinkingMessageDiv = addMessage("AI is thinking...", 'ai', true); 
                     
-                    // --- IMPORTANT: This is the URL of your Netlify Function ---
-                    // Replace YOUR_NETLIFY_SITE_NAME with your actual Netlify site's URL
-                    const netlifyFunctionUrl = 'https://stupendous-basbousa-a1923a.netlify.app/'; 
+                    // --- IMPORTANT: This is the correct URL for your Netlify Function ---
+                    // It's a relative path, which is generally best practice for Netlify Functions
+                    const netlifyFunctionUrl = '/.netlify/functions/chat'; 
                     
                     const response = await fetch(netlifyFunctionUrl, {
                         method: 'POST',
@@ -469,15 +469,15 @@
                     });
 
                     // Remove the thinking message before adding the actual AI response
-                    // We specifically target the 'thinking' message to remove it
                     const currentThinkingMessage = chatMessages.querySelector('.message.ai.thinking');
                     if (currentThinkingMessage && currentThinkingMessage.parentNode) {
                         currentThinkingMessage.parentNode.removeChild(currentThinkingMessage);
                     }
 
                     if (!response.ok) {
-                        const errorText = await response.text(); // Get raw error text for debugging
-                        throw new Error(`AI response error: ${response.status} - ${errorText}`);
+                        // Attempt to read the error from the response body for better debugging
+                        const errorData = await response.json().catch(() => ({ error: 'Unknown error format' }));
+                        throw new Error(`AI response error: ${response.status} - ${JSON.stringify(errorData)}`);
                     }
 
                     const data = await response.json();

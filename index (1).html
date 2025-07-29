@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/6969/6969728.png">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <title>Quantum Basics</title>
+    <style>
+        :root {
+            --base-font: 'Arial', sans-serif;
+            --main-text-color: #5A524D; /* Soft Dark Grey-Brown */
+            --light-text-color: #8D867F; /* Warmer Medium Grey-Brown */
+            --dark-color: #D4BE9B; /* Brighter Medium Beige */
+            --alt-dark-color: #BD9D7C; /* Slightly Deeper Brownish-Beige */
+            --neutral-bg: #EFEDEC; /* Light Beige-Grey for sections */
+            --section-pad: 5.25rem 0 0.8rem;
+            --gap-size: 1.8rem;
+            --head-height: 3.4rem;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--base-font);
+            font-size: 0.9rem;
+            margin-top: var(--head-height);
+            background-color: #F8F5F0; /* Soft Cream for body background */
+            color: var(--main-text-color);
+            transition: all 0.35s ease-out;
+        }
+        button { cursor: pointer; border: none; outline: none; }
+        h1, h2, h3 { color: #3A3530; /* Deep Rich Dark Brown for headings */ font-weight: 600; }
+        ul { list-style: none; }
+        a { text-decoration: none; }
+        img { max-width: 100%; height: auto; }
+        .page-block { padding: var(--section-pad); }
+        .header-title, .center-header {
+            font-size: 1.2rem;
+            margin-bottom: var(--gap-size);
+            line-height: 1.3;
+        }
+        .center-header { text-align: center; }
+        .flow-wrap { max-width: 950px; margin-left: 1.6rem; margin-right: 1.6rem; }
+        .grid-layout { display: grid; }
+        .core-display { overflow: hidden; }
+        .main-top-bar {
+            width: 100%;
+            background-color: #F8F5F0; /* Soft Cream for header */
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 105;
+            transition: all 0.35s ease-out;
+            box-shadow: 0 0.08rem 0.3rem rgba(0, 0, 0, 0.05); /* Lighter shadow */
+        }
+        .top-nav { height: var(--head-height); display: flex; justify-content: space-between; align-items: center; }
+        .brand-text, .nav-opener, .nav-closer { color: var(--main-text-color); }
+        .brand-text {
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: -0.05rem;
+            display: inline-flex;
+            align-items: center;
+            column-gap: 0.4rem;
+            transition: all 0.25s ease;
+        }
+        .brand-text:hover { color: var(--dark-color); }
+        .nav-opener { display: inline-flex; font-size: 1.3rem; cursor: pointer; }
+        @media screen and (max-width: 760px) {
+            .mobile-nav-pane {
+                position: fixed;
+                background-color: #F8F5F0; /* Soft Cream for mobile nav */
+                width: 82%;
+                height: 100%;
+                top: 0;
+                right: -100%; /* Hidden by default */
+                box-shadow: -0.15rem 0 0.25rem rgba(0, 0, 0, 0.09); /* Lighter shadow */
+                padding: 3.8rem 0 0 2.8rem;
+                border-radius: 0.9rem 0 0 0.9rem;
+                transition: all 0.25s ease;
+                z-index: 106;
+            }
+        }
+        .nav-closer { font-size: 1.4rem; position: absolute; top: 0.9rem; right: 1.15rem; cursor: pointer; }
+        .link-collection { display: flex; flex-direction: column; row-gap: 1.4rem; }
+        .nav-link-obj { color: var(--main-text-color); font-weight: 500; transition: all 0.25s ease; }
+        .nav-link-obj:hover { color: var(--dark-color); }
+        /* .menu-show class (from JS) is no longer directly toggleable without JS */
+        .header-shadow-active { box-shadow: 0 0.08rem 0.3rem rgba(0, 0, 0, 0.09); } /* Lighter shadow */
+        /* .current-page-link and .btn-visible classes also relied on JS */
+
+        .intro-area { padding: 3.2rem 0 1.8rem; }
+        .intro-elements { position: relative; row-gap: 1.9rem; }
+        .intro-visual { width: 190px; justify-self: center; }
+        .intro-heading { font-size: 1.9rem; line-height: 1.35; margin-bottom: 0.9rem; }
+        .intro-description { margin-bottom: 2.3rem; }
+        .main-action-button {
+            display: inline-block;
+            background-color: var(--dark-color);
+            color: #3A3530; /* Dark brown text on button for contrast */
+            padding: 0.9rem 1.6rem;
+            border-radius: 0.45rem;
+            font-weight: 500;
+            transition: all 0.25s ease;
+        }
+        .main-action-button:hover { background-color: var(--alt-dark-color); }
+        .button-arrow { transition: all 0.25s ease; }
+        .main-action-button:hover .button-arrow { transform: translateX(0.2rem); }
+        .flex-button { display: inline-flex; align-items: center; column-gap: 0.45rem; }
+        .detail-info-area { row-gap: 1.9rem; }
+        .detail-visual { width: 270px; justify-self: center; }
+        .detail-heading { margin-bottom: 0.9rem; }
+        .detail-text { margin-bottom: 1.9rem; }
+        .highlight-zone {
+            background-color: var(--alt-dark-color); /* Slightly deeper accent for highlight zone background */
+            padding: 2.8rem 1.8rem 1.8rem;
+            border-radius: 0.9rem;
+        }
+        .highlight-grid { gap: 1.9rem; padding-top: 0.9rem; }
+        .highlight-title { color: #3A3530; /* Dark brown text for highlight title */ }
+        .highlight-item { background-color: var(--neutral-bg); /* Light beige-grey for highlight items */ padding: 2.3rem 2.8rem 1.8rem 1.4rem; border-radius: 0.9rem; }
+        .highlight-number {
+            display: inline-block;
+            background-color: var(--dark-color); /* Original accent for highlight numbers */
+            color: #3A3530; /* Dark brown text on highlight number for contrast */
+            padding: 0.45rem 0.7rem;
+            border-radius: 0.2rem;
+            font-size: 1.2rem;
+            margin-bottom: 1.4rem;
+            transition: all 0.25s ease;
+        }
+        .highlight-item-heading { font-size: 0.95rem; margin-bottom: 0.45rem; }
+        .highlight-item-desc { font-size: 0.78rem; }
+        .highlight-item:hover .highlight-number { transform: translateY(-0.2rem); }
+        .site-info-text { text-align: center; font-size: 0.7rem; color: var(--light-text-color); margin: 4.8rem 0 0.9rem; }
+        .scroll-top-btn {
+            position: fixed;
+            background-color: var(--dark-color);
+            right: 0.9rem;
+            bottom: -32%; /* Hidden by default, now always hidden without JS */
+            display: inline-flex;
+            padding: 0.45rem;
+            border-radius: 0.2rem;
+            z-index: 12;
+            opacity: 0.85;
+            transition: all 0.35s ease-out;
+        }
+        .scroll-top-btn:hover { background-color: var(--alt-dark-color); opacity: 1; }
+        
+        ::-webkit-scrollbar { width: 0.55rem; background: #E0DFDD; /* Light grey for scrollbar track */ }
+        ::-webkit-scrollbar-thumb { background: #A09A94; /* Muted medium-grey for scrollbar thumb */ border-radius: 0.45rem; }
+
+        /* --- Styles for fade-in on scroll --- */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* --- End new styles --- */
+
+        /* --- AI Chatbox Styles --- */
+        .chatbox-container {
+            width: 100%;
+            max-width: 950px;
+            margin: 4rem auto 2rem; /* Adjusted margin to push it below content */
+            background-color: var(--neutral-bg); /* Light beige-grey */
+            border-radius: 0.9rem;
+            box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.08); /* Soft shadow */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #E0DFDD; /* Very subtle border */
+        }
+
+        .chatbox-header {
+            background-color: var(--dark-color); /* Brighter Medium Beige */
+            color: #3A3530; /* Dark brown text */
+            padding: 0.8rem 1.2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--alt-dark-color);
+        }
+
+        .chatbox-messages {
+            flex-grow: 1;
+            padding: 1.2rem;
+            overflow-y: auto;
+            max-height: 300px; /* Limit chat history height */
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .chatbox-input-area {
+            display: flex;
+            padding: 0.8rem 1.2rem;
+            border-top: 1px solid #E0DFDD; /* Very subtle border */
+            background-color: #F8F5F0; /* Soft Cream */
+        }
+
+        .chatbox-input {
+            flex-grow: 1;
+            padding: 0.6rem 0.9rem;
+            border: 1px solid #D4C9C1; /* Light beige border */
+            border-radius: 0.4rem;
+            font-family: var(--base-font);
+            font-size: 0.9rem;
+            color: var(--main-text-color);
+            background-color: #FFF; /* Pure white for input field */
+            outline: none;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+            transition: border-color 0.2s ease;
+        }
+        .chatbox-input:focus {
+            border-color: var(--dark-color);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.08), 0 0 0 2px rgba(212, 190, 155, 0.2); /* Light beige focus ring */
+        }
+
+        .chatbox-send-btn {
+            background-color: var(--dark-color);
+            color: #3A3530; /* Dark brown text */
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.4rem;
+            margin-left: 0.8rem;
+            font-weight: 500;
+            transition: background-color 0.25s ease;
+        }
+        .chatbox-send-btn:hover {
+            background-color: var(--alt-dark-color);
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.7rem 1rem;
+            border-radius: 0.7rem;
+            line-height: 1.4;
+            font-size: 0.88rem;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--dark-color); /* User message bubble in beige */
+            color: #3A3530; /* Dark text for user message */
+            border-bottom-right-radius: 0.1rem;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background-color: #E0DFDD; /* AI message bubble in light grey */
+            color: var(--main-text-color); /* Main text color for AI */
+            border-bottom-left-radius: 0.1rem;
+        }
+
+        /* --- NEW CSS for AI Thinking Message --- */
+        .message.ai.thinking {
+            font-style: italic;
+            color: var(--light-text-color); 
+        }
+
+        /* --- Media Queries (keep existing) --- */
+        @media screen and (max-width: 310px) {
+            .flow-wrap { margin-left: 0.9rem; margin-right: 0.9rem; }
+            .intro-visual { width: 170px; }
+            .intro-heading { font-size: 1.4rem; }
+            .highlight-zone { padding: 1.8rem 0.9rem; }
+            .highlight-item { padding: 1.3rem; }
+        }
+        @media screen and (min-width: 560px) {
+            .highlight-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media screen and (min-width: 750px) {
+            body { margin: 0; }
+            .top-nav { height: calc(var(--head-height) + 1.4rem); column-gap: 2.8rem; }
+            .nav-opener, .nav-closer { display: none; }
+            .link-collection { flex-direction: row; column-gap: 2.8rem; }
+            .mobile-nav-pane { margin-left: auto; }
+            .intro-elements, .detail-info-area { grid-template-columns: repeat(2, 1fr); }
+            .intro-area { padding: 9.5rem 0 4.8rem; }
+            .intro-elements { align-items: center; }
+            .intro-visual { width: 270px; order: 1; }
+        }
+        @media screen and (min-width: 970px) {
+            .flow-wrap { margin-left: auto; margin-right: auto; }
+            .page-block { padding: 7.5rem 0 0.9rem; }
+            .header-title, .center-header { font-size: 2.1rem; }
+            .intro-area { padding: 12.5rem 0 4.8rem; }
+            .intro-visual { width: 340px; }
+            .intro-description { padding-right: 6.5rem; }
+            .detail-visual { width: 370px; }
+            .highlight-grid { grid-template-columns: repeat(3, 1fr); }
+            .highlight-zone { padding: 3.2rem 2.3rem; }
+            .highlight-item-heading { font-size: 0.95rem; }
+        }
+        @media screen and (min-width: 1180px) {
+            .scroll-top-btn { right: 2.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-top-bar" id="main-page-nav">
+        <nav class="top-nav flow-wrap">
+            <a href="./" class="brand-text">Quantum Basics</a>
+            <div class="mobile-nav-pane" id="side-nav-menu">
+                <ul class="link-collection">
+                    <li><a href="#intro-section" class="nav-link-obj">Start</a></li>
+                    <li><a href="#details-section" class="nav-link-obj">Info</a></li>
+                    <li><a href="#examples-section" class="nav-link-obj">Uses</a></li>
+                    <li><a href="#learn-section" class="nav-link-obj">Paths</a></li>
+                    <li><a href="#summary-area" class="nav-link-obj">Summary</a></li>
+                </ul>
+                <div class="nav-closer" id="close-menu-btn"><i class="ri-close-line"></i></div>
+            </div>
+            <div class="nav-opener" id="open-menu-btn"><i class="ri-menu-4-line"></i></div>
+        </nav>
+    </header>
+
+    <main class="core-display">
+        <section class="intro-area page-block fade-in-section" id="intro-section">
+            <div class="intro-elements flow-wrap grid-layout">
+                <img src="https://c02.purpledshub.com/uploads/sites/41/2020/08/GettyImages-154932300-crop-ab054fe.jpg?w=1029&webp=1" alt="Quantum Mechanics" class="intro-visual">
+                <div class="intro-data">
+                    <h1 class="intro-heading">Quantum Mechanics</h1>
+                    <p class="intro-description">This physics field explores tiny particle behavior, like electrons and photons. It reveals strange properties, such as multiple states at once or instant long-distance influence. This theory is key to technologies like lasers and computers.</p>
+                    <a href="index.html" class="main-action-button flex-button">Return Home <i class="ri-arrow-right-down-line button-arrow"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="page-block flow-wrap fade-in-section" id="details-section">
+            <div class="detail-info-area grid-layout">
+                <img src="https://thequantumlaend.de/wp-content/uploads/2023/02/Psi3.png" alt="Quantum Concepts" class="detail-visual">
+                <div class="detail-text-content">
+                    <h2 class="header-title detail-heading">When it Originated</h2>
+                    <p class="detail-text">Quantum mechanics outlines how miniature particles, like electrons, behave differently from everyday objects. Unlike classical physics, quantum mechanics shows particles can be in multiple states simultaneously (superposition) and interact instantly regardless of distance (entanglement). This theory explains phenomena such as atomic light emission and particle-wave duality, transforming our fundamental understanding of the universe.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="intro-area page-block fade-in-section" id="examples-section">
+            <div class="intro-elements flow-wrap grid-layout">
+                <img src="https://quantumai.google/static/site-assets/images/marketing/systems/hero.jpg" alt="Quantum AI" class="intro-visual">
+                <div class="intro-data">
+                    <h1 class="header-title intro-heading">Practical Applications</h1>
+                    <p class="intro-description">Quantum mechanics powers advancements in smartphones, lasers, and MRI machines, enhancing device performance and medical imaging accuracy. It also aids in material science and explores quantum computing, which promises to solve complex problems far faster than current systems. Fundamentally, it deepens our cosmic understanding, driving new discoveries and innovations.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="page-block flow-wrap fade-in-section" id="learn-section">
+            <div class="detail-info-area grid-layout">
+                <img src="https://img-cdn.tnwcdn.com/image?fit=1280%2C720&url=https%3A%2F%2Fcdn0.tnwcdn.com%2Fwp-content%2Fblogs.dir%2F1%2Ffiles%2F2021%2F06%2Fschrodingers-cat.jpg&signature=0a120f4487449152b88aefd7df6035e4" alt="Schrodinger's Cat" class="detail-visual">
+                <div class="detail-text-content">
+                    <h2 class="header-title detail-heading">Meaning of 'Quantum'</h2>
+                    <p class="detail-text">A 'quantum' signifies the smallest indivisible unit of energy or matter. Quantum mechanics investigates the behavior of these minuscule units, describing phenomena like particles existing in multiple states or demonstrating instantaneous distant connections. This theory is crucial for understanding and predicting particle behavior at atomic and subatomic scales.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="page-block flow-wrap fade-in-section" id="summary-area">
+            <div class="highlight-zone">
+                <h2 class="center-header highlight-title">Key Points</h2>
+                <div class="highlight-grid grid-layout">
+                    <div class="highlight-item">
+                        <div class="highlight-number">01</div>
+                        <h3 class="highlight-item-heading">What is it?</h3>
+                        <p class="highlight-item-desc">Explains unpredictable behavior of microscopic particles.</p>
+                    </div>
+                    <div class="highlight-item">
+                        <div class="highlight-number">02</div>
+                        <h3 class="highlight-item-heading">Who pioneered it?</h3>
+                        <p class="highlight-item-desc">Planck, Einstein, Bohr, Heisenberg, Schrödinger, Dirac in the 1920s.</p>
+                    </div>
+                    <div class="highlight-item">
+                        <div class="highlight-number">03</div>
+                        <h3 class="highlight-item-heading">Its benefits?</h3>
+                        <p class="highlight-item-desc">Drives new technologies and expands universal comprehension.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p class="site-info-text">&#169; Quantum Basics. All rights reserved.</p>
+    </footer>
+
+    <section class="chatbox-container flow-wrap fade-in-section">
+        <div class="chatbox-header">
+            Talk to the Quantum AI Assistant
+        </div>
+        <div class="chatbox-messages" id="chatbox-messages">
+            </div>
+        <div class="chatbox-input-area">
+            <input type="text" id="chatbox-input" class="chatbox-input" placeholder="Ask a question...">
+            <button id="chatbox-send-btn" class="chatbox-send-btn">Send</button>
+        </div>
+    </section>
+
+    <a href="#" class="scroll-top-btn" id="top-return-btn">
+        <i class="ri-arrow-up-fill scroll-top-icon"></i>
+    </a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Scroll-fade effect ---
+            const sections = document.querySelectorAll('.fade-in-section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // --- AI Chatbox Functionality ---
+            const chatInput = document.getElementById('chatbox-input');
+            const chatSendBtn = document.getElementById('chatbox-send-btn');
+            const chatMessages = document.getElementById('chatbox-messages');
+
+            function addMessage(text, sender, isThinking = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', sender);
+                if (isThinking) {
+                    messageDiv.classList.add('thinking'); // Add 'thinking' class for specific styling
+                }
+                messageDiv.textContent = text;
+                chatMessages.appendChild(messageDiv);
+                // Scroll to the bottom of the chat
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Initial AI greeting (moved from HTML to JS for consistency)
+            addMessage("Hello! I'm here to help you understand Quantum Mechanics. Ask me anything!", 'ai');
+
+            async function getAiResponse(message) {
+                let thinkingMessageDiv; // Declare outside try-catch for wider scope
+
+                try {
+                    // Show a "thinking" message while waiting for AI
+                    thinkingMessageDiv = addMessage("AI is thinking...", 'ai', true); // Pass true to set isThinking
+                    
+                    // --- IMPORTANT: This is the URL of your Netlify Function ---
+                    // Replace YOUR_NETLIFY_SITE_NAME with your actual Netlify site's URL
+                    const netlifyFunctionUrl = 'https://plant-cx.github.io/website/'; 
+                    
+                    const response = await fetch(netlifyFunctionUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ message: message })
+                    });
+
+                    // Remove the thinking message before adding the actual AI response
+                    // We specifically target the 'thinking' message to remove it
+                    const currentThinkingMessage = chatMessages.querySelector('.message.ai.thinking');
+                    if (currentThinkingMessage && currentThinkingMessage.parentNode) {
+                        currentThinkingMessage.parentNode.removeChild(currentThinkingMessage);
+                    }
+
+                    if (!response.ok) {
+                        const errorText = await response.text(); // Get raw error text for debugging
+                        throw new Error(`AI response error: ${response.status} - ${errorText}`);
+                    }
+
+                    const data = await response.json();
+                    addMessage(data.reply, 'ai');
+
+                } catch (error) {
+                    console.error('Error fetching AI response:', error);
+                    // Ensure thinking message is removed even if an error occurs
+                    const currentThinkingMessage = chatMessages.querySelector('.message.ai.thinking');
+                    if (currentThinkingMessage && currentThinkingMessage.parentNode) {
+                        currentThinkingMessage.parentNode.removeChild(currentThinkingMessage);
+                    }
+                    addMessage("Sorry, I'm having trouble connecting to the AI. Please try again later.", 'ai');
+                }
+            }
+
+            chatSendBtn.addEventListener('click', () => {
+                const userMessage = chatInput.value.trim();
+                if (userMessage) {
+                    addMessage(userMessage, 'user');
+                    chatInput.value = ''; // Clear input
+                    getAiResponse(userMessage);
+                }
+            });
+
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    chatSendBtn.click(); // Trigger send button click
+                }
+            });
+        });
+    </script>
+</body>
+</html>

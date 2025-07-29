@@ -1,0 +1,15 @@
+{
+  "name": "chat_bot",
+  "version": "1.0.0",
+  "description": "A website about Quantum Mechanics with an AI assistant.",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify dev"
+  },
+  "keywords": [],
+  "author": "qmze",
+  "license": "ISC",
+  "dependencies": {
+    "openai": "^4.0.0"
+  }
+}

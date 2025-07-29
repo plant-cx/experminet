@@ -10,6 +10,6 @@
   "author": "qmze",
   "license": "ISC",
   "dependencies": {
-  "@google/generative-ai": "^0.12.0" // Use the latest stable version
+  "@google/generative-ai": "^0.12.0"
  }
 }

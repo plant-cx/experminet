@@ -1,7 +1,7 @@
 {
   "name": "your-ai-chatbot",
   "version": "1.0.0",
-  "description": "A simple AI chatbot using Netlify Functions and OpenAI",
+  "description": "A simple AI chatbot using Netlify Functions and Google Gemini",
   "main": "index.js",
   "scripts": {
     "start": "netlify dev"
@@ -9,13 +9,13 @@
   "keywords": [
     "ai",
     "chatbot",
-    "openai",
+    "google-gemini",
     "netlify",
     "javascript"
   ],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "node-fetch": "^2.6.1"
+    "@google/generative-ai": "^0.12.0" // Ensure this version is compatible, check npmjs.com for latest
   }
 }

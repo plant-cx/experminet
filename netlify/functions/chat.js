@@ -1,61 +1,44 @@
 // netlify/functions/chat.js
-// REMOVE: const OpenAI = require('openai');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Add this line to use Google Generative AI SDK
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-// Initialize Google Generative AI with your API key from environment variables
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // NOTE THE NEW ENV VAR NAME: GEMINI_API_KEY
-
-exports.handler = async function(event, context) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
-
-  try {
-    const { message } = JSON.parse(event.body);
-
-    if (!message) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Message is required' }) };
+exports.handler = async (event) => {
+    if (event.httpMethod !== 'POST') {
+        return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    // Get the model you want to use (e.g., "gemini-pro" for text chat)
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    try {
+        const { message } = JSON.parse(event.body);
 
-    // Call Google Gemini API
-    // Gemini's chat history is handled differently; for a single turn, this is simpler:
-    const result = await model.generateContent([
-      // System instruction needs to be part of the prompt in Gemini's simple generateContent
-      // You might need a more complex chat session for persistent roles
-      "You are a helpful assistant specialized in Quantum Mechanics. Explain concepts clearly and concisely.",
-      { role: "user", parts: [{ text: message }] }
-    ]);
+        if (!message) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'Message is required' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
+        }
 
-    const response = await result.response;
-    const aiReply = response.text();
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        // For text-only input, use the gemini-pro model
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    return {
-      statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "https://gregarious-biscotti-ee8112.netlify.app", // Your Netlify site URL
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
-      body: JSON.stringify({ reply: aiReply }),
-    };
+        // Correct way to send a simple string message to generateContent
+        const result = await model.generateContent(message); // <-- Direct string input here!
 
-  } catch (error) {
-    console.error('Error in Netlify function:', error);
-    return {
-      statusCode: 500,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "https://gregarious-biscotti-ee8112.netlify.app", // Your Netlify site URL
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
-      body: JSON.stringify({ error: 'Failed to get response from AI. ' + error.message }),
-    };
-  }
+        const response = await result.response;
+        const text = response.text();
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ reply: text }),
+            headers: { "Content-Type": "application/json" },
+        };
+
+    } catch (error) {
+        console.error("Error in Netlify Function:", error); // Log the full error for debugging
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: "Failed to get response from AI. " + (error.message || "Unknown error.") }),
+            headers: { "Content-Type": "application/json" },
+        };
+    }
 };

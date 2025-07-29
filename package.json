@@ -16,6 +16,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@google/generative-ai": "^0.12.0" // Ensure this version is compatible, check npmjs.com for latest
+  "@google/generative-ai": "^0.12.0"
   }
 }

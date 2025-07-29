@@ -36,7 +36,7 @@ exports.handler = async function(event, context) {
       headers: {
         "Content-Type": "application/json",
         // CORS headers to allow your GitHub Pages site to access this function
-        "Access-Control-Allow-Origin": "https://gregarious-biscotti-ee8112.netlify.app",
+        "Access-Control-Allow-Origin": "https://gregarious-biscotti-ee8112.netlify.app/",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },
@@ -49,7 +49,7 @@ exports.handler = async function(event, context) {
       statusCode: 500,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "https://stupendous-basbousa-a1923a.netlify.app",
+        "Access-Control-Allow-Origin": "https://gregarious-biscotti-ee8112.netlify.app/"
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },

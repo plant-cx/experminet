@@ -1,0 +1,6 @@
+[build]
+  publish = "." # This tells Netlify to publish files from the 'website/' directory itself
+  functions = "netlify/functions" # This tells Netlify that your functions are in 'website/netlify/functions'
+
+[[plugins]]
+package = "@netlify/plugin-functions-install-core"

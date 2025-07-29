@@ -1,15 +1,21 @@
 {
-  "name": "chat_bot",
+  "name": "your-ai-chatbot",
   "version": "1.0.0",
-  "description": "A website about Quantum Mechanics with an AI assistant.",
+  "description": "A simple AI chatbot using Netlify Functions and OpenAI",
   "main": "index.js",
   "scripts": {
     "start": "netlify dev"
   },
-  "keywords": [],
-  "author": "qmze",
-  "license": "ISC",
+  "keywords": [
+    "ai",
+    "chatbot",
+    "openai",
+    "netlify",
+    "javascript"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
-    "@google/generative-ai": "^0.12.0"
+    "node-fetch": "^2.6.1"
   }
 }

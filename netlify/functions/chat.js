@@ -1,10 +1,11 @@
 // netlify/functions/chat.js
-const OpenAI = require('openai');
+// REMOVE: const OpenAI = require('openai');
 
-// Initialize OpenAI with your API key from environment variables
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // This key will NOT be exposed on the frontend.
-});
+// Add this line to use Google Generative AI SDK
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+// Initialize Google Generative AI with your API key from environment variables
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // NOTE THE NEW ENV VAR NAME: GEMINI_API_KEY
 
 exports.handler = async function(event, context) {
   if (event.httpMethod !== 'POST') {
@@ -18,25 +19,26 @@ exports.handler = async function(event, context) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Message is required' }) };
     }
 
-    // Call OpenAI API
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Or "gpt-4", "gpt-4o", etc.
-      messages: [
-        { role: "system", content: "You are a helpful assistant specialized in Quantum Mechanics. Explain concepts clearly and concisely." },
-        { role: "user", content: message }
-      ],
-      max_tokens: 150, // Limit the response length
-      temperature: 0.7, // Creativity of the AI (0.0-1.0)
-    });
+    // Get the model you want to use (e.g., "gemini-pro" for text chat)
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const aiReply = completion.choices[0].message.content;
+    // Call Google Gemini API
+    // Gemini's chat history is handled differently; for a single turn, this is simpler:
+    const result = await model.generateContent([
+      // System instruction needs to be part of the prompt in Gemini's simple generateContent
+      // You might need a more complex chat session for persistent roles
+      "You are a helpful assistant specialized in Quantum Mechanics. Explain concepts clearly and concisely.",
+      { role: "user", parts: [{ text: message }] }
+    ]);
+
+    const response = await result.response;
+    const aiReply = response.text();
 
     return {
       statusCode: 200,
       headers: {
         "Content-Type": "application/json",
-        // CORS headers to allow your GitHub Pages site to access this function
-        "Access-Control-Allow-Origin": "https://gregarious-biscotti-ee8112.netlify.app/",
+        "Access-Control-Allow-Origin": "https://gregarious-biscotti-ee8112.netlify.app", // Your Netlify site URL
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },
@@ -49,7 +51,7 @@ exports.handler = async function(event, context) {
       statusCode: 500,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "https://gregarious-biscotti-ee8112.netlify.app/"
+        "Access-Control-Allow-Origin": "https://gregarious-biscotti-ee8112.netlify.app", // Your Netlify site URL
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },
